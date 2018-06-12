@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// #include "memory.h"
 #include "alloc.h"
 #include "alloc_list.h"
+#include "memory.h"
 
 
 // Debug stuff
@@ -42,6 +42,8 @@ int main()
 
     alloc a;
     alloc_init(&a, sizeof(int), &mark_int);
+    *(int*)(a.ptr) = 42;
+    printf("A value: %i\n", *(int*)(a.ptr));
     printf("A allocated\n");
 
     alloc_list list;
@@ -60,6 +62,18 @@ int main()
     // alloc_mark(&a, 1);
     // printf("Alloc mark: %i\n", a.current_mark);
     // alloc_destroy(&a);
+
+    bool ss_success = false;
+    // bool a_success = false;
+    memory mem;
+    memory_init(&mem, 1000);
+    printf("mem shadow stack size %i\n", mem.stack_size);
+    printf("first: %p, last: %p\n", mem.stack[0], shadow_stack_top(&mem));
+    printf("top addr: %p, value: %i\n",
+        shadow_stack_top(&mem),
+        // *(int*)( (shadow_stack_top(&mem))->ptr )
+        *((int*) ( shadow_stack_top(&mem)->ptr ))
+    );
 
     return 0;
 }
