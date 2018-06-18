@@ -5,6 +5,8 @@
 #include "alloc.h"
 #include "alloc_list.h"
 #include "memory.h"
+#include "gc.h"
+#include "type_tag.h"
 
 
 // Debug stuff
@@ -36,44 +38,46 @@ void mark_a(void* obj, int new_mark) {}
 //     A* 
 // };
 
+void print_gc_mark_func_array(GCMarkFuncArray* array)
+{
+    printf("size: %i, capacity: %i\n", array->size, array->capacity);
+}
+
+void print_gc_mark_table(GCMarkTable* table)
+{
+    for(size_t bucket = 0; bucket < table->buckets; ++bucket)
+    {
+        print_gc_mark_func_array(&(table->data[bucket]));
+    }
+}
+
 int main()
 {
     printf(u8"Hello world!\n");
 
-    alloc a;
-    alloc_init(&a, sizeof(int), &mark_int);
-    *(int*)(a.ptr) = 42;
-    printf("A value: %i\n", *(int*)(a.ptr));
-    printf("A allocated\n");
+    GCMarkTable* mark_funcs = gc_mark_table_new(13);
 
-    alloc_list list;
-    alloc_list_init(&list);
-    alloc_list_add(&list, a);
-    print_alloc_list(&list);
-    alloc_list_destroy(&list);
-    // struct alloc_node* list = alloc_node_new();
-    // alloc_list_init(list, a);
-    // printf("List allocated\n");
-    // alloc_list_destroy(list);
-    // printf("List destroyed\n");
-    // printf("List deallocated\n");
+    {
+        GCMarkFunc temporary = { .type=INTEGER, .mark=mark_int };
+        gc_mark_table_insert(mark_funcs, temporary);
+    }
+    {
+        GCMarkFunc temporary = { .type=INTEGER, .mark=mark_int };
+        gc_mark_table_insert(mark_funcs, temporary);
+    }
+    {
+        GCMarkFunc temporary = { .type=INTEGER, .mark=mark_int };
+        gc_mark_table_insert(mark_funcs, temporary);
+    }
+    {
+        GCMarkFunc temporary = { .type=INTEGER, .mark=mark_int };
+        gc_mark_table_insert(mark_funcs, temporary);
+    }
 
-    // printf("Alloc mark: %i\n", a.current_mark);
-    // alloc_mark(&a, 1);
-    // printf("Alloc mark: %i\n", a.current_mark);
-    // alloc_destroy(&a);
+    print_gc_mark_table(mark_funcs);
 
-    bool ss_success = false;
-    // bool a_success = false;
-    memory mem;
-    memory_init(&mem, 1000);
-    printf("mem shadow stack size %i\n", mem.stack_size);
-    printf("first: %p, last: %p\n", mem.stack[0], shadow_stack_top(&mem));
-    printf("top addr: %p, value: %i\n",
-        shadow_stack_top(&mem),
-        // *(int*)( (shadow_stack_top(&mem))->ptr )
-        *((int*) ( shadow_stack_top(&mem)->ptr ))
-    );
+    gc_mark_table_destroy(mark_funcs);
+    free(mark_funcs);
 
     return 0;
 }

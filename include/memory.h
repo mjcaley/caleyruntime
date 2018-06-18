@@ -31,6 +31,17 @@ bool shadow_stack_new(alloc* stack[], size_t stack_size)
 }
 
 
+memory* memory_new(size_t stack_size)
+{
+    memory* mem = calloc(1, sizeof(*mem) + sizeof(alloc*) * stack_size);
+    if (mem)
+    {
+        alloc_list_init(&(mem->allocated));
+        mem->stack_size = stack_size;
+    }
+    return mem;
+}
+
 bool memory_init(memory* mem, size_t stack_size)
 {
     mem->stack_pos = 0;
