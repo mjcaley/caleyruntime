@@ -23,28 +23,13 @@ void print_alloc_list(alloc_list* list)
 
 
 // Objects and mark functions
-struct example;
-
-
-
 
 void mark_int(GCAlloc* obj, int new_mark)
 {
-    obj->gc_mark = new_mark;
-}
-
-struct A
-{
-    int number;
-};
-
-void mark_a(void* obj, int new_mark){}
-GCAlloc* struct_A_alloc(GCAllocList* list)
-{
-    GCAlloc alloc = { .ptr=malloc(sizeof(A)), .mark=mark_a, .gc_mark=0 }
-    gcalloclist_push(list, alloc);
-
-    return list->head->node;
+    if (obj->gc_mark != new_mark)
+    {
+        obj->gc_mark = new_mark;
+    }
 }
 
 GCAlloc* int_alloc(GCAllocList* list)
@@ -60,6 +45,52 @@ void int_construct(GCAlloc* alloc, int value)
 {
     *(int*)alloc->ptr = value;
 }
+
+
+typedef struct A A;
+typedef struct B B;
+
+struct A
+{
+    B* b;
+};
+
+struct B
+{
+    A* a;
+};
+
+
+void mark_a(GCAlloc* obj, int new_mark)
+{
+    if (obj->gc_mark != new_mark)
+    {
+        obj->gc_mark = new_mark;
+    }
+}
+GCAlloc* struct_A_alloc(GCAllocList* list)
+{
+    GCAlloc alloc = { .ptr=malloc(sizeof(A)), .mark=mark_a, .gc_mark=0 };
+    gcalloclist_push(list, alloc);
+
+    return &list->head->node;
+}
+
+void mark_b(GCAlloc* obj, int new_mark)
+{
+    if (obj->gc_mark != new_mark)
+    {
+        obj->gc_mark = new_mark;
+    }
+}
+GCAlloc* struct_B_alloc(GCAllocList* list)
+{
+    GCAlloc alloc = { .ptr=malloc(sizeof(B)), .mark=mark_b, .gc_mark=0 };
+    gcalloclist_push(list, alloc);
+
+    return &list->head->node;
+}
+
 
 // struct B {
 //     A* 
