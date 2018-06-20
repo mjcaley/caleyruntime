@@ -1,8 +1,84 @@
 #pragma once
 
+#include <stdbool.h>
 #include <stdlib.h>
 
 #include "type_tag.h"
+
+
+typedef struct GCAlloc
+{
+    void* ptr;
+    void (*mark)(void*, int);
+    int gc_mark;
+} GCAlloc;
+
+typedef struct GCAllocNode GCAllocNode;
+struct GCAllocNode
+{
+    GCAlloc node;
+    GCAllocNode* next;
+};
+
+typedef struct GCAllocList
+{
+    GCAllocNode* head;
+} GCAllocList;
+
+
+void gcalloc_destroy(GCAlloc* alloc)
+{
+    free(alloc->ptr);
+}
+
+// void gcallocnode_destroy(GCAllocNode* node)
+// {
+//     gcalloc_destroy(node->node);
+//     free(node);
+// }
+
+
+GCAllocList gcalloclist_new()
+{
+    GCAllocList list = { .head=NULL };
+    return list;
+}
+
+void gcalloclist_push(GCAllocList* list, GCAllocNode* node)
+{
+    node->next = list->head;
+    list->head = node;
+}
+
+void gcalloclist_foreach(GCAllocList* list, void (*func)(GCAllocNode*) )
+{
+    GCAllocNode* node = list->head;
+    while(node)
+    {
+        func(node);
+        node = node->next;
+    }
+}
+
+void gcalloclist_remove(GCAllocList* list, bool (*predicate)(GCAllocNode*) )
+{
+    GCAllocNode* node = list->head;
+    while(node)
+    {
+        if (predicate(node))
+        {
+            free(node->node.ptr);
+            free(node);
+        }
+    }
+}
+
+void gcalloclist_destroy(GCAllocList* list)
+{
+
+}
+
+
 
 
 typedef struct GCMarkFunc
