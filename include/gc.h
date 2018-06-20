@@ -5,13 +5,13 @@
 
 #include "type_tag.h"
 
-
-typedef struct GCAlloc
+typedef struct GCAlloc GCAlloc;
+struct GCAlloc
 {
     void* ptr;
-    void (*mark)(void*, int);
+    void (*mark)(GCAlloc*, int);
     int gc_mark;
-} GCAlloc;
+};
 
 typedef struct GCAllocNode GCAllocNode;
 struct GCAllocNode
@@ -44,8 +44,11 @@ GCAllocList gcalloclist_new()
     return list;
 }
 
-void gcalloclist_push(GCAllocList* list, GCAllocNode* node)
+void gcalloclist_push(GCAllocList* list, GCAlloc alloc)
 {
+    GCAllocNode* node = malloc(sizeof(GCAllocNode));
+    node->node = alloc;
+
     node->next = list->head;
     list->head = node;
 }
