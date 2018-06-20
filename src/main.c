@@ -52,12 +52,12 @@ typedef struct B B;
 
 struct A
 {
-    B* b;
+    GCAlloc* b;
 };
 
 struct B
 {
-    A* a;
+    GCAlloc* a;
 };
 
 
@@ -66,8 +66,11 @@ void mark_a(GCAlloc* obj, int new_mark)
     if (obj->gc_mark != new_mark)
     {
         obj->gc_mark = new_mark;
+        GCAlloc* b = (GCAlloc*)obj->ptr;
+        b->mark(b, new_mark);
     }
 }
+
 GCAlloc* struct_A_alloc(GCAllocList* list)
 {
     GCAlloc alloc = { .ptr=malloc(sizeof(A)), .mark=mark_a, .gc_mark=0 };
@@ -76,19 +79,32 @@ GCAlloc* struct_A_alloc(GCAllocList* list)
     return &list->head->node;
 }
 
+void struct_A_init(GCAlloc* obj, GCAlloc* b)
+{
+    obj->ptr = b;
+}
+
 void mark_b(GCAlloc* obj, int new_mark)
 {
     if (obj->gc_mark != new_mark)
     {
         obj->gc_mark = new_mark;
+        GCAlloc* a = (GCAlloc*)obj->ptr;
+        a->mark(a, new_mark);
     }
 }
+
 GCAlloc* struct_B_alloc(GCAllocList* list)
 {
     GCAlloc alloc = { .ptr=malloc(sizeof(B)), .mark=mark_b, .gc_mark=0 };
     gcalloclist_push(list, alloc);
 
     return &list->head->node;
+}
+
+void struct_B_init(GCAlloc* obj, GCAlloc* a)
+{
+    obj->ptr = a;
 }
 
 
@@ -121,6 +137,13 @@ int main()
 
     printf("Value: %i\n", *(int*)integer1->ptr);
     printf("GC mark: %i\n", integer1->gc_mark);
+
+
+    GCAlloc* a_inst1 = struct_A_alloc(&allocation_list);
+    GCAlloc* b_inst1 = struct_B_alloc(&allocation_list);
+
+    struct_A_init(a_inst1, b_inst1);
+    struct_B_init(b_inst1, a_inst1);
 
     gcalloclist_destroy(&allocation_list);
 
