@@ -33,10 +33,7 @@ bool alloc_list_add(alloc_list* list, alloc allocation)
 
 void alloc_list_destroy(alloc_list* list)
 {
-    alloc_node* node;
-    if (list) {
-        node = list->head;
-    }
+    alloc_node* node = list->head;
     while (node)
     {
         alloc_node* next = node->next;
