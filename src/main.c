@@ -22,10 +22,9 @@ int main()
     int* i = gc_malloc(types);
     *i = 42;
     printf("Number: %i\n", *i);
-    
+
     printf("Mark: %i\n", gc_get_mark(i));
     gc_mark++;
-    // gc_mark_ptr(i);
     traverse(i, gc_mark_ptr);
     printf("Mark: %i\n", gc_get_mark(i));
 
