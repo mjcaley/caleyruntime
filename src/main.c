@@ -44,7 +44,8 @@ int main()
     printf("Mark: %i\n", gc_get_mark(i));
 
     mark++;
-    gc_list_remove(&list, gc_is_not_marked);
+    // gc_list_remove(&list, gc_is_not_marked);
+    gc_list_destroy(&list);
 
     return 0;
 }

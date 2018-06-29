@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "gc_list.h"
+#include "gc.h"
 
 
 void gc_list_init(GCList* list)
@@ -44,4 +45,11 @@ void gc_list_remove(GCList* list, bool (*predicate)(void*))
     }
 
     list->head = head;
+}
+
+
+void gc_list_destroy(GCList* list)
+{
+    bool predicate(void* ptr) { return true; }
+    gc_list_remove(list, predicate);
 }
