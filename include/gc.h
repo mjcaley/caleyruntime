@@ -3,7 +3,7 @@
 #include <stddef.h>
 
 
-extern int gc_mark;
+extern int mark;
 
 typedef struct Type
 {
@@ -12,8 +12,14 @@ typedef struct Type
     char* name;
 } Type;
 
+typedef struct GCObject
+{
+    const Type* type;
+    int mark;
+} GCObject;
 
-void gc_init(const Type* type, void* ptr);
+
+void gc_init(const Type* type, GCObject* ptr);
 void* gc_malloc(const Type* type);
 void gc_free(void* ptr);
 

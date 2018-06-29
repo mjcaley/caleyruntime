@@ -24,7 +24,7 @@ int main()
     printf("Number: %i\n", *i);
 
     printf("Mark: %i\n", gc_get_mark(i));
-    gc_mark++;
+    mark++;
     traverse(i, gc_mark_ptr);
     printf("Mark: %i\n", gc_get_mark(i));
 
