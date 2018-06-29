@@ -64,6 +64,13 @@ void gc_collect()
 
 void traverse(void* ptr, void (*f)(void*))
 {
-    GCObject* obj = (GCObject*)(ptr - sizeof(GCObject));
+    GCObject* obj = (void*)(ptr - sizeof(GCObject));
     obj->type->traverse(ptr, f);
+}
+
+
+bool gc_is_not_marked(void* ptr)
+{
+    GCObject* obj = (void*)(ptr - sizeof(GCObject));
+    return obj->mark != mark;
 }

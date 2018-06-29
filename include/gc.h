@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stddef.h>
+#include <stdbool.h>
 
 
 extern int mark;
@@ -31,3 +32,5 @@ void gc_mark();
 void gc_sweep();
 void gc_collect();
 void traverse(void* ptr, void (*f)(void*));
+
+bool gc_is_not_marked(void* ptr);
