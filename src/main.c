@@ -64,7 +64,7 @@ void gc1()
 
 
 typedef int32_t i32;
-const Type2 TypeInfo_i32 =
+const TypeInfo TypeInfo_i32 =
 {
     .size=sizeof(int32_t),
     .name="int",
@@ -76,7 +76,7 @@ typedef struct A
 {
     int num;
 } A;
-const Type2 TypeInfo_A =
+const TypeInfo TypeInfo_A =
 {
     .size=sizeof(A),
     .name="struct A",
@@ -89,7 +89,7 @@ typedef struct B
     int num;
     A* a;
 } B;
-const Type2 TypeInfo_B =
+const TypeInfo TypeInfo_B =
 {
     .size=sizeof(B),
     .name="struct B",

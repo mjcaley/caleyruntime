@@ -1,17 +1,18 @@
 #include <stdlib.h>
 
-#include "gc.h"
+#include "typeinfo.h"
 #include "gc2.h"
+#include "gc_list.h"
 
 
-void gc_init2(const Type2* type, GCObject2* ptr)
+void gc_init2(const TypeInfo* type, GCObject2* ptr)
 {
     ptr->type = type;
     ptr->mark = mark;
 }
 
 
-void* gc_malloc2(const Type2* type)
+void* gc_malloc2(const TypeInfo* type)
 {
     void* alloc = malloc(sizeof(GCObject2) + type->size);
     gc_init2(type, alloc);
@@ -56,22 +57,4 @@ void traverse2(void* ptr, void (*f)(void*))
         void* member_ptr = *((void**)(ptr + offset));
         f(member_ptr);
     }
-}
-
-
-void gc_mark2(GCList* self)
-{
-
-}
-
-
-void gc_sweep2(GCList* self)
-{
-
-}
-
-
-void gc_collect2(GCList* self)
-{
-
 }
