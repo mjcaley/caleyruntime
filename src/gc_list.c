@@ -86,6 +86,5 @@ void gc_list_destroy(GCList* list)
 
 void gc_list_destroy2(GCList* list)
 {
-    bool predicate(void* ptr) { return true; }
-    gc_list_remove2(list, predicate);
+    gc_list_remove2(list, _gc_list_destroy_true);
 }

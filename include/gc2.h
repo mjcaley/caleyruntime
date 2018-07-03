@@ -8,14 +8,15 @@
 
 extern int mark;
 
-typedef struct GCObject2
+typedef struct Header
 {
     const TypeInfo* type;
     int mark;
-} GCObject2;
+    size_t length;
+} Header;
 
-void gc_init2(const TypeInfo* type, GCObject2* ptr);
 void* gc_malloc2(const TypeInfo* type);
+void* gc_malloc_array(const TypeInfo* type, size_t length);
 void gc_free2(void* ptr);
 
 void gc_mark_ptr2(void* ptr);
