@@ -3,6 +3,7 @@
 
 #include "gc_list.h"
 #include "gc.h"
+#include "gc2.h"
 
 
 void gc_list_init(GCList* list)
@@ -47,9 +48,43 @@ void gc_list_remove(GCList* list, bool (*predicate)(void*))
     list->head = head;
 }
 
+void gc_list_remove2(GCList* list, bool (*predicate)(void*))
+{
+    if (!list->head) { return; }
+
+    GCListNode* head = NULL;
+    GCListNode* next = list->head;
+    while(next)
+    {
+        if (predicate(next))
+        {
+            GCListNode* temp = next->next;
+            gc_free2(next->data);
+            free(next);
+            next = temp;
+        }
+        else
+        {
+            GCListNode* temp = next->next;
+            next->next = head;
+            head = next;
+            next = temp;
+        }
+    }
+
+    list->head = head;
+}
+
 
 void gc_list_destroy(GCList* list)
 {
     bool predicate(void* ptr) { return true; }
     gc_list_remove(list, predicate);
+}
+
+
+void gc_list_destroy2(GCList* list)
+{
+    bool predicate(void* ptr) { return true; }
+    gc_list_remove2(list, predicate);
 }

@@ -86,14 +86,18 @@ const Type2 TypeInfo_B =
 
 void gc2()
 {
+    gc_list_init(&list);
+
     i32* i = gc_malloc2(&TypeInfo_i32);
+    gc_list_add(&list, i);
     *i = 42;
-    gc_free2(i);
 
     A* a = gc_malloc2(&TypeInfo_A);
+    gc_list_add(&list, a);
     a->num = 42;
 
         B* b = gc_malloc2(&TypeInfo_B);
+        gc_list_add(&list, b);
         b->num = 24;
         b->a = a;
 
@@ -102,9 +106,7 @@ void gc2()
         gc_mark_ptr2(b);
         gc_mark_ptr2(a);
 
-        gc_free2(b);
-
-    gc_free2(a);
+    gc_list_destroy2(&list);
 }
 
 
