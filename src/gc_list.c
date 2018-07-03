@@ -48,8 +48,9 @@ void gc_list_remove(GCList* list, bool (*predicate)(void*))
 }
 
 
+static bool _gc_list_destroy_true(void* ptr) { return true; }
+
 void gc_list_destroy(GCList* list)
 {
-    bool predicate(void* ptr) { return true; }
-    gc_list_remove(list, predicate);
+    gc_list_remove(list, _gc_list_destroy_true);
 }
