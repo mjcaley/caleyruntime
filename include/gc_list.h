@@ -18,4 +18,6 @@ typedef struct GCList
 void gc_list_init(GCList* list);
 void gc_list_add(GCList* list, void* ptr);
 void gc_list_remove(GCList* list, bool (*predicate)(void*));
+void gc_list_remove2(GCList* list, bool (*predicate)(void*));
 void gc_list_destroy(GCList* list);
+void gc_list_destroy2(GCList* list);

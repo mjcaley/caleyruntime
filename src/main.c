@@ -1,9 +1,25 @@
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "gc.h"
 #include "gc_list.h"
+
+#include "gc2.h"
+
+
+// Allocate on stack example from Cello
+// #define alloc_stack(T) header_init( \
+//   (char[sizeof(struct Header) + sizeof(struct T)]){0}, T)
+//
+// var header_init(var head, var type) {
+//   struct Header* self = head;
+//   self->type = type;
+//   return ((char*)self) + sizeof(struct Header);
+// }
+
+
 
 
 void traverse_int(void* ptr, void(*f)(void*))
@@ -18,10 +34,8 @@ const Type types[] = {
 GCList list;
 
 
-int main()
+void gc1()
 {
-    printf(u8"Hello world!\n");
-
     gc_list_init(&list);
 
     int* i = gc_malloc(types);
@@ -46,6 +60,74 @@ int main()
     mark++;
     // gc_list_remove(&list, gc_is_not_marked);
     gc_list_destroy(&list);
+}
+
+
+typedef int32_t i32;
+const TypeInfo TypeInfo_i32 =
+{
+    .size=sizeof(int32_t),
+    .name="int",
+    .offset_len=0,
+    .offsets={}
+};
+
+typedef struct A
+{
+    int num;
+} A;
+const TypeInfo TypeInfo_A =
+{
+    .size=sizeof(A),
+    .name="struct A",
+    .offset_len=0,
+    .offsets={}
+};
+
+typedef struct B
+{
+    int num;
+    A* a;
+} B;
+const TypeInfo TypeInfo_B =
+{
+    .size=sizeof(B),
+    .name="struct B",
+    .offset_len=1,
+    .offsets={offsetof(B, a)}
+};
+
+void gc2()
+{
+    gc_list_init(&list);
+
+    i32* i = gc_malloc2(&TypeInfo_i32);
+    gc_list_add(&list, i);
+    *i = 42;
+
+    A* a = gc_malloc2(&TypeInfo_A);
+    gc_list_add(&list, a);
+    a->num = 42;
+
+        B* b = gc_malloc2(&TypeInfo_B);
+        gc_list_add(&list, b);
+        b->num = 24;
+        b->a = a;
+
+        ++mark;
+        // pretend we're looping through roots
+        gc_mark_ptr2(b);
+        gc_mark_ptr2(a);
+
+    gc_list_destroy2(&list);
+}
+
+
+int main()
+{
+    printf(u8"Hello world!\n");
+
+    gc2();
 
     return 0;
 }
