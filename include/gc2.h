@@ -27,3 +27,7 @@ void gc_free2(void* ptr);
 void gc_mark_ptr2(void* ptr);
 
 void traverse2(void* ptr, void (*f)(void*));
+
+void gc_mark2(GCList* self);
+void gc_sweep2(GCList* self);
+void gc_collect(GCList* self);

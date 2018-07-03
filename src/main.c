@@ -9,6 +9,19 @@
 #include "gc2.h"
 
 
+// Allocate on stack example from Cello
+// #define alloc_stack(T) header_init( \
+//   (char[sizeof(struct Header) + sizeof(struct T)]){0}, T)
+//
+// var header_init(var head, var type) {
+//   struct Header* self = head;
+//   self->type = type;
+//   return ((char*)self) + sizeof(struct Header);
+// }
+
+
+
+
 void traverse_int(void* ptr, void(*f)(void*))
 {
     f(ptr);

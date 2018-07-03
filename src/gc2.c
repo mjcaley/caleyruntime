@@ -55,3 +55,21 @@ void traverse2(void* ptr, void (*f)(void*))
         f(member_ptr);
     }
 }
+
+
+void gc_mark2(GCList* self)
+{
+
+}
+
+
+void gc_sweep2(GCList* self)
+{
+
+}
+
+
+void gc_collect2(GCList* self)
+{
+
+}
