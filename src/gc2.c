@@ -29,6 +29,8 @@ void gc_free2(void* ptr)
 
 void gc_mark_ptr2(void* ptr)
 {
+    if (!ptr) { return; }
+
     GCObject2* obj = ptr - sizeof(GCObject2);
     if (obj->mark != mark)
     {
