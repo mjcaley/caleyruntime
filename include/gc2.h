@@ -19,6 +19,8 @@ void* gc_malloc2(const TypeInfo* type);
 void* gc_malloc_array(const TypeInfo* type, size_t length);
 void gc_free2(void* ptr);
 
+const Header *const gc_get_header(void* ptr);
+
 void gc_mark_ptr2(void* ptr);
 
 void traverse2(void* ptr, void (*f)(void*));

@@ -40,6 +40,13 @@ void gc_free2(void* ptr)
 }
 
 
+const Header *const gc_get_header(void* ptr)
+{
+    Header* obj = ptr - sizeof(Header);
+    return obj;
+}
+
+
 void gc_mark_ptr2(void* ptr)
 {
     if (!ptr) { return; }
