@@ -6,8 +6,6 @@
 #include "gc.h"
 #include "gc_list.h"
 
-#include "gc2.h"
-
 
 // Allocate on stack example from Cello
 // #define alloc_stack(T) header_init( \
@@ -20,47 +18,7 @@
 // }
 
 
-
-
-void traverse_int(void* ptr, void(*f)(void*))
-{
-    f(ptr);
-}
-
-const Type types[] = {
-    [0] = { traverse_int, sizeof(int), "int" }
-};
-
 GCList list;
-
-
-void gc1()
-{
-    gc_list_init(&list);
-
-    int* i = gc_malloc(types);
-    *i = 1;
-    gc_list_add(&list, i);
-
-    int* i2 = gc_malloc(types);
-    *i2 = 2;
-    gc_list_add(&list, i2);
-
-    int* i3 = gc_malloc(types);
-    *i3 = 3;
-    gc_list_add(&list, i3);
-
-    printf("Number: %i\n", *i);
-
-    printf("Mark: %i\n", gc_get_mark(i));
-    mark++;
-    traverse(i, gc_mark_ptr);
-    printf("Mark: %i\n", gc_get_mark(i));
-
-    mark++;
-    // gc_list_remove(&list, gc_is_not_marked);
-    gc_list_destroy(&list);
-}
 
 
 typedef int32_t i32;
@@ -101,15 +59,15 @@ void gc2()
 {
     gc_list_init(&list);
 
-    i32* i = gc_malloc2(&TypeInfo_i32);
+    i32* i = gc_malloc(&TypeInfo_i32);
     gc_list_add(&list, i);
     *i = 42;
 
-    A* a = gc_malloc2(&TypeInfo_A);
+    A* a = gc_malloc(&TypeInfo_A);
     gc_list_add(&list, a);
     a->num = 42;
 
-        B* b = gc_malloc2(&TypeInfo_B);
+        B* b = gc_malloc(&TypeInfo_B);
         gc_list_add(&list, b);
         b->num = 24;
         b->a = a;
@@ -119,10 +77,10 @@ void gc2()
 
         ++mark;
         // pretend we're looping through roots
-        gc_mark_ptr2(b);
-        gc_mark_ptr2(a);
+        gc_mark_ptr(b);
+        gc_mark_ptr(a);
 
-    gc_list_destroy2(&list);
+    gc_list_destroy(&list);
 }
 
 
