@@ -115,7 +115,7 @@ void gc2()
         b->a = a;
         const Header* const  b_header = gc_get_header(b);
         printf("Header values for A instance:\n\ttype name: %s\n\tsize: %i\n\tlength: %i\n\tmark: %i\n",
-               b_header->type->name, b_header->type->size, b_header->mark);
+               b_header->type->name, b_header->type->size, b_header->length, b_header->mark);
 
         ++mark;
         // pretend we're looping through roots
