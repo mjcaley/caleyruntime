@@ -79,3 +79,23 @@ void traverse(void* ptr, void (*f)(void*))
         f(member_ptr);
     }
 }
+
+
+void gc_mark()
+{
+    ++mark;
+
+}
+
+
+void gc_sweep()
+{
+    
+}
+
+
+void gc_collect()
+{
+    gc_mark();
+    gc_sweep();
+}

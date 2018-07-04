@@ -24,3 +24,7 @@ const Header *const gc_get_header(void* ptr);
 void gc_mark_ptr(void* ptr);
 
 void traverse(void* ptr, void (*f)(void*));
+
+void gc_mark();
+void gc_sweep();
+void gc_collect();
