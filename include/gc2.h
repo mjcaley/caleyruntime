@@ -25,12 +25,13 @@ typedef struct
 
 
 // init_header
-void type_tag_init(TypeTag* type_tag, const TypeInfo* type, size_t length);
+void* init_type_tag(TypeTag* type_tag, const TypeInfo* type, size_t length);
+
 
 // stack_alloc
 #ifndef alloc_stack
-#define alloc_stack(T) type_tag_init( \
-  (char[sizeof(TypeTag) + sizeof(T)]){0}, T, 0)
+#define alloc_stack(T) init_type_tag( \
+  (char[sizeof(TypeTag) + (T.size)]){0}, T, 1)
 #endif
 // stack_alloc_array
 #ifndef alloc_stack_array

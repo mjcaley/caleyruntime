@@ -5,18 +5,13 @@ int mark = 0;
 
 
 // init_header
-void init_type_tag(TypeTag* type_tag, const TypeInfo* type, size_t length)
+void* init_type_tag(TypeTag* type_tag, const TypeInfo* type, size_t length)
 {
     type_tag->type = type;
     type_tag->length = length;
-}
 
-// stack_alloc
-#define alloc_stack(T) type_tag_init( \
-  (char[sizeof(TypeTag) + sizeof(T)]){0}, T, 0)
-// stack_alloc_array
-#define alloc_stack_array(T, size) header_init( \
-  (char[sizeof(Header) + sizeof(T)]){0}, T, size)
+    return type_tag;
+}
 
 // init_gc_header
 void init_gc_header(GCHeader* self, TypeTag type_tag)
@@ -33,7 +28,7 @@ void* alloc_heap_array(const TypeInfo* type_info, size_t num)
 
     GCHeader* header = alloc;
     // TypeTag tag = { .type=type_info, .length=num };
-    type_tag_init(header->type_tag, type_info, num);
+    init_type_tag(header->type_tag, type_info, num);
     init_gc_header(header, tag);
 
     void* ptr = (char*)alloc + sizeof(GCHeader);
