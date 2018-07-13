@@ -55,6 +55,8 @@ const TypeInfo TypeInfo_B =
     .offsets={offsetof(B, a)}
 };
 
+// #define stack_allocate(TYPE_INFO) 
+
 void gc2()
 {
     gc_list_init(&list);

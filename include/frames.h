@@ -35,7 +35,7 @@
 typedef struct Frame
 {
     size_t size;
-    void* locals[];
+    void* locals;
 } Frame;
 
 
