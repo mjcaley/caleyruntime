@@ -48,6 +48,15 @@ struct Reference
 };
 
 
+
+template<const TypeTag* Tag, typename T>
+struct Object
+{
+    const TypeTag* type_tag { Tag };
+    T value;
+};
+
+
 struct UserStruct
 {
     static const std::array<std::size_t, 1> _offsets { offsetof(UserStruct, number) };
