@@ -130,31 +130,56 @@ struct TypeDescription
 {
     using type = T;
 
-    static constexpr const std::size_t size { sizeof(type) };
-    static constexpr const char* name { Name };
-    static constexpr const std::array<std::size_t, sizeof...(Offsets)> offsets { Offsets... };
+    const std::size_t size { sizeof(type) };
+    const std::string name { Name };
+    const std::array<std::size_t, sizeof...(Offsets)> offsets { Offsets... };
 };
 
-using i32_def = TypeDescription<int, String<'i', 'n', 't'>::data>;
+static const TypeDescription<std::int32_t, String<'i', 'n', 't'>::data> i32_def;
+static const TypeDescription<std::byte, String<'b', 'y', 't', 'e'>::data> byte_def;
 
+
+struct UserType
+{
+    std::int32_t integer;
+    float floating_point;
+};
+
+static const TypeDescription<UserType, String<'U', 's', 'e', 'r', 'T', 'y', 'p', 'e'>::data> usertype_def;
+
+struct UserType2
+{
+    UserType* child;
+};
+
+static const TypeDescription<UserType2, String<'U', 's', 'e', 'r', 'T', 'y', 'p', 'e', '2'>::data> usertype2_def;
+
+
+template<typename TypeDesc, TypeDesc* Tag, typename T>
+struct TypeHeader
+{
+    TypeHeader(std::size_t length = 1) : length(length) {}
+
+    TypeDesc const *const type_tag { Tag };
+    const std::size_t length;
+    T data;
+};
 
 template<typename T>
-std::add_pointer_t<typename T::type> allocate()
+std::add_pointer_t<typename T::type> allocate(const T* type_description, std::size_t length)
 {
-    void* ptr = std::malloc(T::size);
+    void* ptr = std::malloc(TypeHeader<T, type_description, T::type>(length));
 
-    return static_cast<std::add_pointer_t<typename T::type>>(ptr);
+    return static_cast<std::add_pointer_t<typename T::type>>( ptr + offsetof(TypeHeader<T, type_description, T::type>, data) );
 };
 
 int main()
 {
     std::cout << String<'A', ' ' , 's', 't', 'r', 'i', 'n', 'g'>::data << std::endl;
 
-    // std::cout << from_string("A").string << std::endl;
 
-    
 
-    std::cout << "Type description name:" << i32_def::name << std::endl;
+    std::cout << "Type description name:" << i32_def.name << std::endl;
 
     return 0;
 };
