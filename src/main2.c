@@ -1,4 +1,6 @@
 #include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 
 // #include "gc2.h"
 #include "typeinfo.h"
@@ -11,18 +13,23 @@ const TypeInfo i32_def = {
 };
 
 typedef struct {
-    TypeInfo const *const type_tag;
+    TypeInfo* type_tag;
     struct
     {
         int a;
         int b;
-    } value;
-} Custom;
+    } data;
+} Example;
 
 typedef struct {
-    TypeInfo const *const type_tag;
-    int32_t value;
+    TypeInfo const* type_tag;
+    int32_t data;
 } i32;
+
+typedef struct {
+    TypeInfo const* type_tag;
+    float data;
+} f32;
 
 
 int main()
@@ -33,8 +40,10 @@ int main()
     // alloc_free(integer);
 
     i32 integer_stack = { .type_tag=&i32_def };
-    i32* integer_heap = malloc(sizeof(i32));
-    *(i32*)&integer_heap->type_tag = &i32_def; // can't assign to const
+
+    i32* integer_heap = calloc(1, sizeof(i32));
+    integer_heap->type_tag = &i32_def;
+
 
 
     return 0;
