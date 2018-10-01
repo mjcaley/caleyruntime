@@ -5,8 +5,6 @@
 #include "gc.h"
 
 
-
-
 typedef struct A A;
 typedef struct B B;
 
@@ -45,6 +43,27 @@ TypeDefinition B_TypeDef = {
 };
 
 
+typedef struct C C;
+typedef struct C_Reference C_Reference;
+
+typedef struct C_Reference {
+	ReferenceTag header;
+	C* ref;
+} C_Reference;
+
+typedef struct C {
+	ValueTag header;
+	C_Reference c;
+} C;
+
+TypeDefinition C_TypeDef = {
+	.name = "C",
+	.size = sizeof(C),
+	.num_offsets = 1,
+	.offsets = {offsetof(C, c)}
+};
+
+
 TypeTag* mark_list[1000] = { 0 };
 size_t mark_list_len = 0;
 int gc_mark = 0;
@@ -52,49 +71,52 @@ int gc_mark = 0;
 int main() {
 	A a;
 	// init_header_value((Value*)&a, &A_TypeDef);
-	a.header.type = Type { ValueType };
+	a.header.type.tag = ValueType;
 	a.header.type_def = &A_TypeDef;
+	init_gc((TypeTag*)&a);
 	a.a = 42;
 	a.b = 43;
 
 	B b;
 	// init_header_value((Value*)&b, &B_TypeDef);
-	b.header.type = ValueType;
-	b.header.type_def = &B_TYpeDef;
-	{
-		//Reference r_temp;
-		B_Reference r_temp;
-		//init_header_reference(&r_temp);
-		r_temp.header.type = ReferenceType;
-		//r_temp.ref = &a;
-		r_temp.header.ref = &a;
-		b.a = r_temp;
-	}
+	b.header.type.tag = ValueType;
+	b.header.type_def = &B_TypeDef;
+	init_gc((TypeTag*)&b);
+	b.a.header.type.tag = ReferenceType;
+	b.a.ref = &a;
 
 	// Test cycles, if it goes into an infinite loop then we've got a problem
-	B c1, c2;
+	C c1, c2;
 	//init_header_value((Value*)&c1, &B_TypeDef);
-	c1.header.type = ValueType;
-	c1.header.type_def = &B_TypeDef;
+	c1.header.type.tag = ValueType;
+	c1.header.type_def = &C_TypeDef;
 	//init_header_value((Value*)&c2, &B_TypeDef);
-	c2.header.type = ValueType;
-	c2.header.type_def = &B_TypeDef;
-	c1.a = B_Reference { .tag=ReferenceType, .ref=&c2 };
+	c2.header.type.tag = ValueType;
+	c2.header.type_def = &C_TypeDef;
+	c1.c.header.type.tag = ReferenceType;
+	c1.c.ref = &c2;
 	//c1.a = make_reference(&c2);
-	c2.a = B_Reference{ .tag = ReferenceType,.ref = &c1 };
+	c2.c.header.type.tag = ReferenceType;
+	c2.c.ref = &c1;
 	// c2.a = make_reference(&c1);
-	mark_list_add(mark_list, &mark_list_len, (TypeHeader*)&c1);
-	mark_list_add(mark_list, &mark_list_len, (TypeHeader*)&c2);
+	mark_list_add(mark_list, &mark_list_len, (TypeTag*)&c1);
+	mark_list_add(mark_list, &mark_list_len, (TypeTag*)&c2);
 
 
 	// Test marking child objects
 
 	B d1;
 	A d2;
-	init_header_value((Value*)&d1, &B_TypeDef);
-	init_header_value((Value*)&d2, &A_TypeDef);
-	d1.a = make_reference(&d2);
-	mark_list_add(mark_list, &mark_list_len, (TypeHeader*)&d1); // Only add the first object
+	//init_header_value((ValueTag*)&d1, &B_TypeDef);
+	d1.header.type.tag = ValueType;
+	d1.header.type_def = &B_TypeDef;
+	//init_header_value((ValueTag*)&d2, &A_TypeDef);
+	d2.header.type.tag = ValueType;
+	d2.header.type_def = &A_TypeDef;
+	//d1.a = make_reference(&d2);
+	d1.header.type.tag = ReferenceType;
+	d1.a.ref = &d2;
+	mark_list_add(mark_list, &mark_list_len, (TypeTag*)&d1); // Only add the first object
 
 
 	printf("A mark: %i\n", a.header.gc.mark);
@@ -104,8 +126,8 @@ int main() {
 	printf("D1 mark: %i\n", d1.header.gc.mark);
 	printf("D2 mark: %i\n", d2.header.gc.mark);
 
-	mark_list_add(mark_list, &mark_list_len, (TypeHeader*)&a);
-	mark_list_add(mark_list, &mark_list_len, (TypeHeader*)&b);
+	mark_list_add(mark_list, &mark_list_len, (TypeTag*)&a);
+	mark_list_add(mark_list, &mark_list_len, (TypeTag*)&b);
 	gc_mark++;
 	mark(mark_list, &mark_list_len, gc_mark);
 

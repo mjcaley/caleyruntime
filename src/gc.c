@@ -50,3 +50,14 @@ void mark(TypeTag* mark_list[], size_t* mark_list_len, int new_mark) {
 		}
 	}
 }
+
+void init_gc(TypeTag* t) {
+	switch (t->tag) {
+	case ValueType:
+		((ValueTag*)t)->gc.mark = 0;
+		break;
+	case ArrayType:
+		((ArrayTag*)t)->gc.mark = 0;
+		break;
+	}
+}
