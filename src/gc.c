@@ -1,101 +1,52 @@
-#include <stdlib.h>
-
-#include "typeinfo.h"
-#include "gc.h"
-#include "gc_list.h"
+#include "tags.h"
+#include "type_definition.h"
 
 
-int mark = 0;
-
-static void gc_init(Header* alloc, const TypeInfo* type, size_t length)
-{
-    alloc->type = type;
-    alloc->mark = mark;
-    alloc->length = length;
+void mark_list_add(TypeTag* mark_list[], size_t* mark_list_len, TypeTag* ptr) {
+	mark_list[*mark_list_len] = ptr;
+	(*mark_list_len)++;
 }
 
-
-void* gc_malloc(const TypeInfo* type)
-{
-    void* alloc = calloc(1, sizeof(Header) + type->size);
-    gc_init(alloc, type, 0);
-    void* ptr = alloc + sizeof(Header);
-
-    return ptr;
+void mark_value_type(TypeTag* mark_list[], size_t* mark_list_len, int new_mark, ValueTag* v) {
+	if (v->gc.mark != new_mark) {
+		v->gc.mark = new_mark;
+		for (int offset_i = 0; offset_i < v->type_def->num_offsets; ++offset_i) {
+			void* offset_ptr = (char*)v + v->type_def->offsets[offset_i];
+			mark_list_add(mark_list, mark_list_len, offset_ptr);
+		}
+	}
 }
 
-
-void* gc_malloc_array(const TypeInfo* type, size_t length)
-{
-    void* alloc = calloc(1, sizeof(Header) + type->size * length);
-    gc_init(alloc, type, length);
-    void* ptr = alloc + sizeof(Header);
-
-    return ptr;
+void mark_array_type(TypeTag* mark_list[], size_t* mark_list_len, int new_mark, ArrayTag* a) {
+	if (a->gc.mark != new_mark) {
+		a->gc.mark = new_mark;
+		for (int element_index = 0; element_index < a->length; ++element_index) {
+			for (int offset_i = 0; offset_i < a->type_def->num_offsets; ++offset_i) {
+				void* offset_ptr = (char*)a + a->type_def->offsets[offset_i];
+				mark_list_add(mark_list, mark_list_len, offset_ptr);
+			}
+		}
+	}
 }
 
-
-void gc_free(void* ptr)
-{
-    void* alloc = ptr - sizeof(Header);
-    free(alloc);
+void mark_ref_type(TypeTag* mark_list[], size_t* mark_list_len, int new_mark, ReferenceTag* r) {
+	mark_list_add(mark_list, mark_list_len, r + sizeof(ReferenceTag));
 }
 
+void mark(TypeTag* mark_list[], size_t* mark_list_len, int new_mark) {
+	for (size_t i = 0; i < *mark_list_len; ++i) {
+		if (!mark_list[i]) { continue; }
 
-const Header *const gc_get_header(void* ptr)
-{
-    Header* obj = ptr - sizeof(Header);
-    return obj;
-}
+		if (mark_list[i]->tag == ValueType) {
+			mark_value_type(mark_list, mark_list_len, new_mark, (ValueTag*)mark_list[i]);
+		}
 
+		else if (mark_list[i]->tag == ArrayType) {
+			mark_array_type(mark_list, mark_list_len, new_mark, (ArrayTag*)mark_list[i]);
+		}
 
-void gc_mark_ptr(void* ptr)
-{
-    if (!ptr) { return; }
-
-    Header* obj = ptr - sizeof(Header);
-    if (obj->mark != mark)
-    {
-        obj->mark = mark;
-        traverse(ptr, gc_mark_ptr);
-    }
-}
-
-
-int gc_get_mark(void* ptr)
-{
-    Header* obj = ptr - sizeof(Header);
-    return obj->mark;
-}
-
-
-void traverse(void* ptr, void (*f)(void*))
-{
-    Header* obj = (Header*)((char*)ptr - sizeof(Header));
-    for (size_t i = 0; i < obj->type->offset_len; ++i)
-    {
-        size_t offset = obj->type->offsets[i];
-        void* member_ptr = *((void**)(ptr + offset));
-        f(member_ptr);
-    }
-}
-
-
-void gc_mark()
-{
-    ++mark;
-
-}
-
-
-void gc_sweep()
-{
-    
-}
-
-
-void gc_collect()
-{
-    gc_mark();
-    gc_sweep();
+		else if (mark_list[i]->tag == ReferenceType) {
+			mark_ref_type(mark_list, mark_list_len, new_mark, (ReferenceTag*)mark_list[i]);
+		}
+	}
 }

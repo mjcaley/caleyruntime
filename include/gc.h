@@ -1,30 +1,11 @@
 #pragma once
 
 #include <stddef.h>
-#include <stdbool.h>
-
-#include "typeinfo.h"
+#include "tags.h"
 
 
-extern int mark;
-
-typedef struct Header
-{
-    const TypeInfo* type;
-    int mark;
-    size_t length;
-} Header;
-
-void* gc_malloc(const TypeInfo* type);
-void* gc_malloc_array(const TypeInfo* type, size_t length);
-void gc_free(void* ptr);
-
-const Header *const gc_get_header(void* ptr);
-
-void gc_mark_ptr(void* ptr);
-
-void traverse(void* ptr, void (*f)(void*));
-
-void gc_mark();
-void gc_sweep();
-void gc_collect();
+void mark_list_add(TypeTag* mark_list[], size_t* mark_list_len, TypeTag* ptr);
+void mark_value_type(TypeTag* mark_list[], size_t* mark_list_len, int new_mark, ValueTag* v);
+void mark_array_type(TypeTag* mark_list[], size_t* mark_list_len, int new_mark, ArrayTag* a);
+void mark_ref_type(TypeTag* mark_list[], size_t* mark_list_len, int new_mark, ReferenceTag* r);
+void mark(TypeTag* mark_list[], size_t* mark_list_len, int new_mark);
