@@ -1,8 +1,24 @@
 #pragma once
 
 #include <stddef.h>
+#include <stdlib.h>
 #include "tags.h"
 
+
+typedef struct AllocationNode AllocationNode;
+struct AllocationNode {
+	TypeTag* allocation;
+	AllocationNode* next;
+};
+
+typedef struct AllocationList {
+	AllocationNode* head;
+} AllocationList;
+
+void init_allocation_list(AllocationList* a);
+void add_allocation(AllocationList* list, TypeTag* allocation);
+
+void gc_mark(AllocationList* list, int mark);
 
 void mark_list_add(TypeTag* mark_list[], size_t* mark_list_len, TypeTag* ptr);
 void mark_value_type(TypeTag* mark_list[], size_t* mark_list_len, int new_mark, ValueTag* v);

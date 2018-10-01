@@ -1,6 +1,60 @@
+#include "gc.h"
 #include "tags.h"
 #include "type_definition.h"
 
+
+void init_allocation_list(AllocationList* list) {
+	list->head = NULL;
+}
+
+void add_allocation(AllocationList* list, AllocationNode* node) {
+	node->next = list->head;
+	list->head = node;
+}
+
+void create_allocation(AllocationList* list, TypeTag* allocation) {
+	AllocationNode* n = malloc(sizeof(AllocationNode));
+	// TODO: Check if we're out of memory
+
+	n->allocation = allocation;
+	add_allocation(list, n);
+}
+
+void gc_sweep(AllocationList* list, int mark) {
+	AllocationList new_list = { .head = NULL };
+
+	AllocationNode* node = list->head;
+	while (node) {
+		switch (node->allocation->tag) {
+		case ValueType:
+			if (((ValueTag*)node->allocation)->gc.mark == mark) {
+				add_allocation(&new_list, node);
+				node = node->next;
+			}
+			else {
+				AllocationNode* orig = node;
+				node = orig->next;
+				free(orig->allocation);
+				free(orig);
+			}
+			break;
+		case ArrayType:
+			if (((ArrayTag*)node->allocation)->gc.mark == mark) {
+				add_allocation(&new_list, node);
+				node = node->next;
+			}
+			else {
+				AllocationNode* orig = node;
+				node = orig->next;
+				free(orig->allocation);
+				free(orig);
+			}
+			break;
+		}
+	}
+
+	list->head = new_list.head;
+}
 
 void mark_list_add(TypeTag* mark_list[], size_t* mark_list_len, TypeTag* ptr) {
 	mark_list[*mark_list_len] = ptr;
