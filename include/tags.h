@@ -39,3 +39,9 @@ typedef struct ArrayTag {
 	size_t length;
 	// Array of objects
 } ArrayTag;
+
+
+void init_type_tag(TypeTag* tag, Type type);
+void init_reference_tag(ReferenceTag* tag);
+void init_value_tag(ValueTag* tag, TypeDefinition* type_def);
+void init_array_tag(ArrayTag* tag, TypeDefinition* type_def, size_t length);

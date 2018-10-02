@@ -2,36 +2,33 @@
 #include "gc.h"
 
 
-AllocationList* list;
-
-void setUp() {
-	list = malloc(sizeof(AllocationList));
-}
-void tearDown() {
-	free(list);
-}
+void setUp() {}
+void tearDown() {}
 
 void test_init_allocation_list() {
-  init_allocation_list(list);
-  TEST_ASSERT_NULL(list->head);
+	AllocationList list;
+	init_allocation_list(&list);
+	TEST_ASSERT_NULL(list.head);
 }
 
 void test_add_allocation() {
+	AllocationList list;
 	AllocationNode node;
 	TypeTag tag;
 	node.allocation = &tag;
 	node.next = NULL;
 
-	add_allocation(list, &node);
+	add_allocation(&list, &node);
 
-	TEST_ASSERT_EQUAL_PTR(&node, list->head);
+	TEST_ASSERT_EQUAL_PTR(&node, list.head);
 }
 
 void test_create_allocation() {
+	AllocationList list;
 	TypeTag tag;
-	create_allocation(list, &tag);
+	create_allocation(&list, &tag);
 
-	TEST_ASSERT_EQUAL_PTR(&tag, list->head->allocation);
+	TEST_ASSERT_EQUAL_PTR(&tag, list.head->allocation);
 }
 
 int main() {
