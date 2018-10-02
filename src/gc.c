@@ -20,6 +20,10 @@ void create_allocation(AllocationList* list, TypeTag* allocation) {
 	add_allocation(list, n);
 }
 
+void gc_mark(AllocationList* list, int mark) {
+
+}
+
 void gc_sweep(AllocationList* list, int mark) {
 	AllocationList new_list = { .head = NULL };
 
@@ -84,7 +88,7 @@ void mark_array_type(TypeTag* mark_list[], size_t* mark_list_len, int new_mark, 
 }
 
 void mark_ref_type(TypeTag* mark_list[], size_t* mark_list_len, int new_mark, ReferenceTag* r) {
-	mark_list_add(mark_list, mark_list_len, r + sizeof(ReferenceTag));
+	mark_list_add(mark_list, mark_list_len, (TypeTag*)(r + 1));
 }
 
 void mark(TypeTag* mark_list[], size_t* mark_list_len, int new_mark) {

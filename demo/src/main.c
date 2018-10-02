@@ -66,7 +66,7 @@ TypeDefinition C_TypeDef = {
 
 TypeTag* mark_list[1000] = { 0 };
 size_t mark_list_len = 0;
-int gc_mark = 0;
+int current_mark = 0;
 
 int main() {
 	A a;
@@ -128,8 +128,8 @@ int main() {
 
 	mark_list_add(mark_list, &mark_list_len, (TypeTag*)&a);
 	mark_list_add(mark_list, &mark_list_len, (TypeTag*)&b);
-	gc_mark++;
-	mark(mark_list, &mark_list_len, gc_mark);
+	current_mark++;
+	mark(mark_list, &mark_list_len, current_mark);
 
 	printf("A mark: %i\n", a.header.gc.mark);
 	printf("B mark: %i\n", b.header.gc.mark);
