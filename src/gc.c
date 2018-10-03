@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "gc.h"
 #include "tags.h"
 #include "type_definition.h"
@@ -5,6 +6,14 @@
 
 void init_allocation_list(AllocationList* list) {
 	list->head = NULL;
+}
+
+AllocationNode* create_allocation(size_t size) {
+	return calloc(1, size + sizeof(void*));
+}
+
+void* get_object_pointer(AllocationNode* node) {
+	return &(node->allocation);
 }
 
 void add_allocation(AllocationList* list, AllocationNode* node) {
