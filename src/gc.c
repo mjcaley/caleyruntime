@@ -21,7 +21,45 @@ void add_allocation(AllocationList* list, AllocationNode* node) {
 	list->head = node;
 }
 
-void gc_mark(AllocationList* list, int mark) {
+typedef struct MarkQueue {
+	size_t length;
+	size_t capacity;
+	AllocationNode** nodes;
+} MarkQueue;
+
+void mq_init(MarkQueue* q) {
+	q->length = 0;
+	q->capacity = 0;
+	q->nodes = malloc(sizeof(0));
+}
+
+void mq_free(MarkQueue* q) {
+	free(q->nodes);
+}
+
+void mq_expand(MarkQueue* q) {
+	size_t new_length = (q->length + 1) * 2;
+	AllocationNode** new_nodes = calloc(new_length, sizeof(AllocationNode*));
+	for (size_t i = 0; i < q->length; ++i) {
+		new_nodes[i] = q->nodes[i];
+	}
+	mq_free(q);
+	q->nodes = new_nodes;
+	q->length = new_length;
+}
+
+void mq_append(MarkQueue* q, AllocationNode* a) {
+	if (q->length >= q->capacity) {
+		mq_expand(q);
+	}
+	q->nodes[q->capacity + 1] = a;
+	q->capacity++;
+}
+
+void gc_mark(AllocationList* const list, const int mark) {
+	MarkQueue mq;
+	mq_init(&mq);
+
 
 }
 
