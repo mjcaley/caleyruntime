@@ -13,10 +13,8 @@ void test_init_allocation_list() {
 
 void test_add_allocation() {
 	AllocationList list;
-	AllocationNode node;
-	TypeTag tag;
-	node.allocation = &tag;
-	node.next = NULL;
+	init_allocation_list(&list);
+	AllocationNode node = { .next = NULL, .allocation = {.tag = ValueType} };
 
 	add_allocation(&list, &node);
 

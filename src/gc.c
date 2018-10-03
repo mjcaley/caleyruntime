@@ -17,13 +17,15 @@ void gc_mark(AllocationList* list, int mark) {
 }
 
 void gc_sweep(AllocationList* list, int mark) {
-	AllocationList new_list = { .head = NULL };
+	AllocationList new_list;
+	init_allocation_list(&new_list);
 
 	AllocationNode* node = list->head;
 	while (node) {
+		TypeTag* tag = &node->allocation;
 		switch (node->allocation.tag) {
 		case ValueType:
-			if (((ValueTag*)node->allocation)->gc.mark == mark) {
+			if ( ((ValueTag*)tag)->gc.mark == mark) {
 				add_allocation(&new_list, node);
 				node = node->next;
 			}
@@ -34,7 +36,7 @@ void gc_sweep(AllocationList* list, int mark) {
 			}
 			break;
 		case ArrayType:
-			if (((ArrayTag*)node->allocation)->gc.mark == mark) {
+			if (((ArrayTag*)tag)->gc.mark == mark) {
 				add_allocation(&new_list, node);
 				node = node->next;
 			}
