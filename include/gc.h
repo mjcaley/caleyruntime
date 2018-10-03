@@ -7,8 +7,8 @@
 
 typedef struct AllocationNode AllocationNode;
 struct AllocationNode {
-	TypeTag* allocation;
 	AllocationNode* next;
+	TypeTag allocation;
 };
 
 typedef struct AllocationList {
@@ -17,7 +17,6 @@ typedef struct AllocationList {
 
 void init_allocation_list(AllocationList* a);
 void add_allocation(AllocationList* list, AllocationNode* node);
-void create_allocation(AllocationList* list, TypeTag* allocation);
 
 void gc_mark(AllocationList* list, int mark);
 

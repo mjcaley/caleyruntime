@@ -12,14 +12,6 @@ void add_allocation(AllocationList* list, AllocationNode* node) {
 	list->head = node;
 }
 
-void create_allocation(AllocationList* list, TypeTag* allocation) {
-	AllocationNode* n = malloc(sizeof(AllocationNode));
-	// TODO: Check if we're out of memory
-
-	n->allocation = allocation;
-	add_allocation(list, n);
-}
-
 void gc_mark(AllocationList* list, int mark) {
 
 }
@@ -29,7 +21,7 @@ void gc_sweep(AllocationList* list, int mark) {
 
 	AllocationNode* node = list->head;
 	while (node) {
-		switch (node->allocation->tag) {
+		switch (node->allocation.tag) {
 		case ValueType:
 			if (((ValueTag*)node->allocation)->gc.mark == mark) {
 				add_allocation(&new_list, node);
@@ -38,7 +30,6 @@ void gc_sweep(AllocationList* list, int mark) {
 			else {
 				AllocationNode* orig = node;
 				node = orig->next;
-				free(orig->allocation);
 				free(orig);
 			}
 			break;
@@ -50,7 +41,6 @@ void gc_sweep(AllocationList* list, int mark) {
 			else {
 				AllocationNode* orig = node;
 				node = orig->next;
-				free(orig->allocation);
 				free(orig);
 			}
 			break;
