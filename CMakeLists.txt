@@ -18,3 +18,5 @@ add_subdirectory (unity)
 
 include (CTest)
 add_subdirectory (test)
+
+add_subdirectory (external)
