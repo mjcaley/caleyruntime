@@ -1,37 +1,55 @@
+#include <stdlib.h>
+
 #include "greatest.h"
 
 #include "gc.h"
 
 
-AllocationList* alloc_list;
-
-static void allocation_list_setup(void* data) {
-
-}
-
-static void allocation_list_teardown(void* data) {
-
-}
-TEST allocation_list_head_null() {
-	init_allocation_list(alloc_list);
-	ASSERT(NULL == list.head);
+TEST allocation_list_head_null(AllocationList* list) {
+	init_allocation_list(list);
+	ASSERT(NULL == list->head);
 	PASS();
 }
 
-
-static void setup_cb(void *data) {
-	printf("setup callback for each test case\n");
-}
-
-static void teardown_cb(void *data) {
-	printf("teardown callback for each test case\n");
-}
-
 SUITE(allocation_list) {
-	SET_SETUP(allocation_list_setup, &alloc_list);
-	SET_TEARDOWN(allocation_list_teardown, &alloc_list);
+	AllocationList list;
 
-	RUN_TEST(allocation_list_head_null);
+	RUN_TESTp(allocation_list_head_null, &list);
+}
+
+void setup_new_allocation_list(void* data) {
+	AllocationList* list = (AllocationList*)data;
+	list->head = NULL;
+}
+
+void teardown_new_allocation_list(void* data) {
+	AllocationList* list = (AllocationList*)data;
+	list->head = NULL;
+}
+
+TEST add_allocation_to_list(AllocationList* list) {
+	AllocationNode node = { .next = NULL,.allocation = ReferenceType };
+	add_allocation(list, &node);
+
+	if (!list->head) { FAIL(); }
+	ASSERT(list->head);
+	ASSERT_EQ(&node, list->head);
+	PASS();
+}
+
+TEST create_an_allocation() {
+	AllocationNode* node = create_allocation(sizeof(int));
+	ASSERT(node);
+	free(node);
+	PASS();
+}
+
+SUITE(empty_allocation_list) {
+	AllocationList list;
+	SET_SETUP(setup_new_allocation_list, &list);
+	SET_TEARDOWN(teardown_new_allocation_list, &list);
+
+	RUN_TESTp(add_allocation_to_list, &list);
 }
 
 GREATEST_MAIN_DEFS();
@@ -40,6 +58,8 @@ int main(int argc, char **argv) {
 	GREATEST_MAIN_BEGIN();
 
 	RUN_SUITE(allocation_list);
+	RUN_SUITE(empty_allocation_list);
+	RUN_TEST(create_an_allocation);
 
 	GREATEST_MAIN_END();
 }
