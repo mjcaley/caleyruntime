@@ -50,6 +50,9 @@ SUITE(empty_allocation_list) {
 	SET_TEARDOWN(teardown_new_allocation_list, &list);
 
 	RUN_TESTp(add_allocation_to_list, &list);
+
+	SET_SETUP(NULL, NULL);
+	SET_TEARDOWN(NULL, NULL);
 }
 
 GREATEST_MAIN_DEFS();
