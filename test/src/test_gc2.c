@@ -55,6 +55,14 @@ SUITE(empty_allocation_list) {
 	SET_TEARDOWN(NULL, NULL);
 }
 
+TEST return_object_from_allocation() {
+	AllocationNode a = { .next=NULL, .allocation=ArrayType };
+	void* object = get_object_pointer(&a);
+
+	ASSERT_EQ(&a.allocation, object);
+	PASS();
+}
+
 GREATEST_MAIN_DEFS();
 
 int main(int argc, char **argv) {
@@ -63,6 +71,7 @@ int main(int argc, char **argv) {
 	RUN_SUITE(allocation_list);
 	RUN_SUITE(empty_allocation_list);
 	RUN_TEST(create_an_allocation);
+	RUN_TEST(return_object_from_allocation);
 
 	GREATEST_MAIN_END();
 }
