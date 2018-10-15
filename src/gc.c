@@ -9,7 +9,7 @@ void init_allocation_list(AllocationList* list) {
 }
 
 AllocationNode* create_allocation(size_t size) {
-	return calloc(1, size + sizeof(void*));
+	return calloc(1, sizeof(AllocationNode*) + size);
 }
 
 void* get_object_pointer(AllocationNode* node) {
