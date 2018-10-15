@@ -17,8 +17,8 @@ typedef struct AllocationList {
 
 void init_allocation_list(AllocationList* a);
 AllocationNode* create_allocation(size_t size);
-void* get_object_pointer(AllocationNode* node);
 void add_allocation(AllocationList* list, AllocationNode* node);
+void* get_object_pointer(AllocationNode* node);
 
 void gc_mark(AllocationList* list, int mark);
 

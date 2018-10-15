@@ -1,51 +1,77 @@
-#include "unity.h"
+#include <stdlib.h>
+
+#include "greatest.h"
+
 #include "gc.h"
 
 
-void setUp() {}
-void tearDown() {}
-
-void test_init_allocation_list() {
-	AllocationList list;
-	init_allocation_list(&list);
-	TEST_ASSERT_NULL(list.head);
+TEST allocation_list_head_null(AllocationList* list) {
+	init_allocation_list(list);
+	ASSERT(NULL == list->head);
+	PASS();
 }
 
-void test_add_allocation() {
+SUITE(allocation_list) {
 	AllocationList list;
-	init_allocation_list(&list);
-	AllocationNode node = { .next = NULL, .allocation = {.tag = ValueType} };
 
-	add_allocation(&list, &node);
-
-	TEST_ASSERT_EQUAL_PTR(&node, list.head);
+	RUN_TESTp(allocation_list_head_null, &list);
 }
 
-void test_create_allocation() {
+void setup_new_allocation_list(void* data) {
+	AllocationList* list = (AllocationList*)data;
+	list->head = NULL;
+}
+
+void teardown_new_allocation_list(void* data) {
+	AllocationList* list = (AllocationList*)data;
+	list->head = NULL;
+}
+
+TEST add_allocation_to_list(AllocationList* list) {
+	AllocationNode node = { .next = NULL,.allocation = ReferenceType };
+	add_allocation(list, &node);
+
+	if (!list->head) { FAIL(); }
+	ASSERT(list->head);
+	ASSERT_EQ(&node, list->head);
+	PASS();
+}
+
+TEST create_an_allocation() {
 	AllocationNode* node = create_allocation(sizeof(int));
-
-	TEST_ASSERT_NOT_NULL(node);
+	ASSERT(node);
+	free(node);
+	PASS();
 }
 
-typedef struct Integer {
-	ValueTag header;
-	int value;
-} Integer;
+SUITE(empty_allocation_list) {
+	AllocationList list;
+	SET_SETUP(setup_new_allocation_list, &list);
+	SET_TEARDOWN(teardown_new_allocation_list, &list);
 
-void test_get_object_pointer() {
-	AllocationNode* node = create_allocation(sizeof(Integer));
-	Integer* value_ptr = get_object_pointer(node);
+	RUN_TESTp(add_allocation_to_list, &list);
 
-	TEST_ASSERT_EQUAL_PTR(&(node->allocation), value_ptr);
+	SET_SETUP(NULL, NULL);
+	SET_TEARDOWN(NULL, NULL);
 }
 
-int main() {
-  UNITY_BEGIN();
+TEST return_object_from_allocation() {
+	AllocationNode a = { .next=NULL, .allocation=ArrayType };
+	void* object = get_object_pointer(&a);
 
-  RUN_TEST(test_init_allocation_list);
-  RUN_TEST(test_add_allocation);
-  RUN_TEST(test_create_allocation);
-  RUN_TEST(test_get_object_pointer);
+	ASSERT_EQ(&a.allocation, object);
+	PASS();
+}
 
-  return UNITY_END();
+GREATEST_MAIN_DEFS();
+
+int main(int argc, char **argv) {
+	GREATEST_MAIN_BEGIN();
+
+	RUN_SUITE(allocation_list);
+	RUN_SUITE(empty_allocation_list);
+	RUN_TEST(create_an_allocation);
+	RUN_TEST(return_object_from_allocation);
+
+	GREATEST_MAIN_END();
 }

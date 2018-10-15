@@ -14,8 +14,6 @@ set (CALEYRUNTIME_INCLUDE include)
 
 add_subdirectory (demo)
 
-add_subdirectory (unity)
-
 include (CTest)
 add_subdirectory (test)
 
