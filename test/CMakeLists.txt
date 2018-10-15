@@ -12,3 +12,7 @@ add_test (test_tags test_tags_app)
 add_executable (test_gc2_app src/test_gc2.c)
 target_link_libraries (test_gc2_app caleyruntime greatest)
 add_test (test_gc2 test_gc2_app)
+
+add_executable (test_tags2_app src/test_tags2.c)
+target_link_libraries (test_tags2_app caleyruntime greatest)
+add_test (test_tags2 test_tags2_app)
