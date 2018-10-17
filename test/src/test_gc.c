@@ -63,6 +63,10 @@ TEST return_object_from_allocation() {
 	PASS();
 }
 
+SUITE(mark) {
+
+}
+
 GREATEST_MAIN_DEFS();
 
 int main(int argc, char **argv) {

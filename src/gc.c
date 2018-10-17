@@ -2,6 +2,7 @@
 #include "gc.h"
 #include "tags.h"
 #include "type_definition.h"
+#include "pointer_queue.h"
 
 
 void init_allocation_list(AllocationList* list) {
@@ -21,46 +22,60 @@ void add_allocation(AllocationList* list, AllocationNode* node) {
 	list->head = node;
 }
 
-typedef struct MarkQueue {
-	size_t length;
-	size_t capacity;
-	AllocationNode** nodes;
-} MarkQueue;
-
-void mq_init(MarkQueue* q) {
-	q->length = 0;
-	q->capacity = 0;
-	q->nodes = malloc(sizeof(0));
-}
-
-void mq_free(MarkQueue* q) {
-	free(q->nodes);
-}
-
-void mq_expand(MarkQueue* q) {
-	size_t new_length = (q->length + 1) * 2;
-	AllocationNode** new_nodes = calloc(new_length, sizeof(AllocationNode*));
-	for (size_t i = 0; i < q->length; ++i) {
-		new_nodes[i] = q->nodes[i];
+static void gc_mark_queue_references(PointerQueue* queue, void* object, TypeDefinition* type_def) {
+	for (size_t i = 0; i < type_def->num_offsets; ++i) {
+		void* next_reference = (char*)object + type_def->offsets[i];
+		push_pointer_queue(queue, next_reference);
 	}
-	mq_free(q);
-	q->nodes = new_nodes;
-	q->length = new_length;
 }
 
-void mq_append(MarkQueue* q, AllocationNode* a) {
-	if (q->length >= q->capacity) {
-		mq_expand(q);
+static void gc_mark_value(ValueTag* allocation, PointerQueue* queue, const int mark) {
+	if (allocation->gc.mark == mark) {
+		return;
 	}
-	q->nodes[q->capacity + 1] = a;
-	q->capacity++;
+
+	allocation->gc.mark = mark;
+
+	void* object = (char*)allocation + sizeof(ValueTag);
+	gc_mark_queue_references(queue, object, allocation->type_def);
 }
 
-void gc_mark(AllocationList* const list, const int mark) {
-	MarkQueue mq;
-	mq_init(&mq);
+static void gc_mark_array(ArrayTag* allocation, PointerQueue* queue, const int mark) {
+	if (allocation->gc.mark == mark) {
+		return;
+	}
 
+	allocation->gc.mark = mark;
 
+	for (size_t i = 0;
+		i < allocation->length;
+		++i) {
+		void* object = (char*)allocation + sizeof(ArrayTag);
+		void* element = (char*)object + allocation->type_def->size * i;
+		gc_mark_queue_references(queue, element, allocation->type_def);
+	}
+}
+
+static void gc_mark_reference(ReferenceTag* allocation, PointerQueue* queue, const int mark) {
+	void* object = (char*)allocation + sizeof(ReferenceTag);
+	push_pointer_queue(queue, object);
+}
+
+void gc_mark(PointerQueue* queue, const int mark) {
+	void* value;
+	while (value = pop_pointer_queue(&queue)) {
+		AllocationNode* alloc = (AllocationNode*)value;
+		switch (alloc->allocation.tag) {
+		case ValueType:
+			gc_mark_value((ValueTag*)alloc, &queue, mark);
+		case ArrayType:
+			gc_mark_array((ArrayTag*)alloc, &queue, mark);
+		case ReferenceType:
+			gc_mark_reference((ReferenceTag*)alloc, &queue, mark);
+		default:
+			break;
+		}
+	}
 }
 
 void gc_sweep(AllocationList* list, int mark) {
@@ -97,6 +112,20 @@ void gc_sweep(AllocationList* list, int mark) {
 	}
 
 	list->head = new_list.head;
+}
+
+void gc_collect(AllocationList* allocations, const int mark) {
+	// gets stack frames
+	// collects roots into PointerQueue
+	// calls gc_mark
+	// calls gc_sweep
+
+	PointerQueue queue;
+	init_pointer_queue(&queue);
+	gc_mark(&queue, mark);
+	destroy_pointer_queue(&queue);
+
+	gc_sweep(allocations, mark);
 }
 
 void mark_list_add(TypeTag* mark_list[], size_t* mark_list_len, TypeTag* ptr) {
