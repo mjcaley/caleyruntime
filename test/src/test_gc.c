@@ -63,7 +63,7 @@ TEST return_object_from_allocation() {
 	PASS();
 }
 
-SUITE(mark) {
+SUITE(mark_functions) {
 
 }
 
