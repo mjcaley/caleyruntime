@@ -63,15 +63,18 @@ static void gc_mark_reference(ReferenceTag* allocation, PointerQueue* queue, con
 
 void gc_mark(PointerQueue* queue, const int mark) {
 	void* value;
-	while (value = pop_pointer_queue(&queue)) {
-		AllocationNode* alloc = (AllocationNode*)value;
-		switch (alloc->allocation.tag) {
+	while (value = pop_pointer_queue(queue)) {
+		TypeTag* alloc = (TypeTag*)value;
+		switch (alloc->tag) {
 		case ValueType:
-			gc_mark_value((ValueTag*)alloc, &queue, mark);
+			gc_mark_value((ValueTag*)alloc, queue, mark);
+			break;
 		case ArrayType:
-			gc_mark_array((ArrayTag*)alloc, &queue, mark);
+			gc_mark_array((ArrayTag*)alloc, queue, mark);
+			break;
 		case ReferenceType:
-			gc_mark_reference((ReferenceTag*)alloc, &queue, mark);
+			gc_mark_reference((ReferenceTag*)alloc, queue, mark);
+			break;
 		default:
 			break;
 		}

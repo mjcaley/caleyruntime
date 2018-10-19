@@ -23,7 +23,7 @@ void push_pointer_queue(PointerQueue* queue, void* value) {
 }
 
 void* pop_pointer_queue(PointerQueue* queue) {
-	if (!queue->head) {
+	if (!(queue->head)) {
 		return NULL;
 	};
 

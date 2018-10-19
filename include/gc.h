@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include "tags.h"
+#include "pointer_queue.h"
 
 
 typedef struct AllocationNode AllocationNode;
@@ -20,7 +21,7 @@ AllocationNode* create_allocation(size_t size);
 void add_allocation(AllocationList* list, AllocationNode* node);
 void* get_object_pointer(AllocationNode* node);
 
-void gc_mark(AllocationList* list, int mark);
+void gc_mark(PointerQueue* queue, const int mark);
 
 void mark_list_add(TypeTag* mark_list[], size_t* mark_list_len, TypeTag* ptr);
 void mark_value_type(TypeTag* mark_list[], size_t* mark_list_len, int new_mark, ValueTag* v);
